@@ -27,13 +27,15 @@
                 <thead>
                     <tr>
                         <th>S/N</th>
+                        <th>ID</th>
                         <th>First name</th>
                         <th>Last name</th>
                         <th>Middle name</th>
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Gender</th>
-                        <th>Nationality</th>
+                        <th>State</th>
+                        <th>Region</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -41,20 +43,16 @@
                     @foreach ($users as $key=>$user )
                         <tr>
                             <td>{{ $key + 1 }}</td>
+                            <td>{{ $user['nin'] }}</td>
                             <td>{{ $user['first_name'] }}</td>
                             <td>{{ $user['last_name'] }}</td>
                             <td>{{ $user['middle_name'] }}</td>
                             <td>{{ $user['email'] }}</td>
                             <td>{{ $user['phone'] }}</td>
                             <td>{{ $user['gender'] }}</td>
-                            <td>{{ $user['nationality'] }}</td>
+                            <td>{{ $user['state'] }}</td>
+                            <td>{{ $user['region'] }}</td>
                             <td class="d-flex"><a href="{{route('user.edit', [$user['id']])}}" class="btn btn-sm btn-primary me-2">Edit</a>
-                                <form action="{{route('user.delete', [$user['id']])}}" method="POST" id="">
-                                    @csrf
-                                    @method('DELETE')
-                                </form>
-                                <button type="submit"
-                                    class="btn btn-sm btn-danger">Delete</button></td>
                         </tr>
                     @endforeach
                 </tbody>

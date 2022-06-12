@@ -15,7 +15,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     /**
@@ -42,23 +42,31 @@ class HomeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'avatar' => ['required', 'image'],
             'first_name' => ['required'],
             'last_name' => ['required'],
             'middle_name' => ['required'],
-            'email' => ['required'],
-            'nationality' => ['required'],
+            'email' => ['required', 'unique:users'],
+            'state' => ['required'],
+            'region' => ['required'],
             'phone' => ['required'],
             'gender' => ['required'],
             'address' => ['required']
         ]);
 
-
+        $data = $request->all();
+        do {
+            $nin = rand(10000000000, 99999999999);
+        } while (User::where('nin', $nin)->exists());
+        $data['nin'] = $nin;
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput()->with('error', 'Invalid input data');
         }
 
+        $data['avatar'] = $this->uploadImageAndReturnPathToSave(request()->file('avatar'));
+
         // Store data
-        if (User::create($request->all())) {
+        if (User::create($data)) {
             return redirect()->route('home')->with('success', 'User created successfully');
         }
 
@@ -72,7 +80,8 @@ class HomeController extends Controller
             'last_name' => ['required'],
             'middle_name' => ['required'],
             'email' => ['required', 'unique:users,email,' .$user['id']],
-            'nationality' => ['required'],
+            'state' => ['required'],
+            'region' => ['required'],
             'phone' => ['required'],
             'gender' => ['required'],
             'address' => ['required']
@@ -87,10 +96,15 @@ class HomeController extends Controller
         $data['last_name'] = $request['last_name'];
         $data['middle_name'] = $request['middle_name'];
         $data['email'] = $request['email'];
-        $data['nationality'] = $request['nationality'];
+        $data['state'] = $request['state'];
+        $data['region'] = $request['region'];
         $data['phone'] = $request['phone'];
         $data['gender'] = $request['gender'];
         $data['address'] = $request['address'];
+
+        if (request()->file('avatar')) {
+            $data['avatar'] = $this->uploadImageAndReturnPathToSave(request()->file('avatar'));
+        }
 
         // Store data
         if ($user->update($data)) {
@@ -107,5 +121,13 @@ class HomeController extends Controller
             return redirect()->route('home')->with('success', 'User deleted successfully');
         }
         return back()->with('error', 'Error deleting successfully');
+    }
+
+    protected function uploadImageAndReturnPathToSave($image): string
+    {
+        $destinationPath = 'assets'; // upload path
+        $transferImage = time() . '.' . $image->getClientOriginalExtension();
+        $image->move($destinationPath, $transferImage);
+        return $destinationPath ."/".$transferImage;
     }
 }
